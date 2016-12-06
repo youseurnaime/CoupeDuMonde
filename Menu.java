@@ -1,4 +1,3 @@
-import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -13,7 +12,9 @@ public class Menu {
 		System.out.println("----- MENU PRINCIPAL -----");
 		System.out.println("Que souhaitez vous faire ?");
 		System.out.println("1 : Gestion des équipes");
-		System.out.println("2 : Démarrer un tournoi");
+		System.out.println("2 : Nouveau tournoi");
+		System.out.println("3 : Quitter");
+		
 		int choix = 0;
 		do{
 			choix = lireValeur();
@@ -23,9 +24,51 @@ public class Menu {
 		case 1: 
 			gestionEquipes();
 			break;
+			
 		case 2:
+			try{
+				tournoi(initTournoi());
+			}catch(Exception e){
+				System.out.println(e.getMessage());
+				attendre();
+				menuPrincipal();
+			}
+			break;
+			
+		case 3:
 			break;
 		}
+	}
+	
+	public static Hashtable<Integer,Equipe> initTournoi() throws PasAssezDEquipesException{
+		Hashtable<Integer,Equipe> lesEquipes = Equipe.charger();
+		if(lesEquipes.size() < Equipe.NB_EQUIPES) throw new PasAssezDEquipesException("Vous devez avoir créé au moins "+Equipe.NB_EQUIPES+" équipes pour pouvoir lancer un tournois !");
+		else if(lesEquipes.size() > Equipe.NB_EQUIPES){
+			int choix = 0;
+			Enumeration<Equipe> e;
+			Enumeration<Integer> k;
+			do{
+				e = lesEquipes.elements();
+				k = lesEquipes.keys();
+				while(e.hasMoreElements()){
+					System.out.println(k.nextElement()+"   :   "+e.nextElement().getClub().toString()+"\n\n");
+				}
+				System.out.println("Sur ces "+lesEquipes.size()+" équipes, seules "+Equipe.NB_EQUIPES+" peuvent participer au tournois.");
+				do{
+					System.out.println("Entrez le numéro d'une équipe qui ne participera pas au tournois : ");
+					choix = lireValeur();
+				}while(!lesEquipes.containsKey(choix));
+				
+				lesEquipes.remove(choix);
+				
+			}while(lesEquipes.size() != Equipe.NB_EQUIPES);
+			
+		}
+		return lesEquipes;
+	}
+	
+	public static void tournoi(Hashtable<Integer,Equipe> lesEquipes){
+		//TODO
 	}
 	
 	public static void gestionEquipes(){
@@ -63,8 +106,8 @@ public class Menu {
 				break;
 			case 3:
 				if(nbEquipes!=0){
-					Enumeration e = lesEquipes.elements();
-					Enumeration k = lesEquipes.keys();
+					Enumeration<Equipe> e = lesEquipes.elements();
+					Enumeration<Integer> k = lesEquipes.keys();
 					while(e.hasMoreElements()){
 						System.out.println(k.nextElement()+"   :   "+e.nextElement().toString()+"\n\n");
 					}

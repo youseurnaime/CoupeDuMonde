@@ -1,7 +1,7 @@
 
-public class NombreEquipesIncorrectExeption extends Exception{
+public class NombreEquipesIncorrectException extends Exception{
 
-	public NombreEquipesIncorrectExeption(String s){
+	public NombreEquipesIncorrectException(String s){
 		super(s);
 	}
 
