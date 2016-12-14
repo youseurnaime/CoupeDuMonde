@@ -1,11 +1,16 @@
-import java.util.ArrayList;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Scanner;
-import java.io.*;
 
-public class Equipe {
+public class Equipe implements Serializable{
 	final static int NB_EQUIPES = 16;
 	final static int NB_JOUEURS = 9;
 	private Hashtable<Integer,Joueur> lesJoueurs;
@@ -161,7 +166,7 @@ public class Equipe {
 			nbRemplacants = Menu.lireValeur();
 		}while(nbRemplacants > 5);
 			
-		for(int i = 1 ; i < nbRemplacants ; i++){
+		for(int i = 1 ; i <= nbRemplacants ; i++){
 			ok=false;
 			do{
 				try{
@@ -172,7 +177,7 @@ public class Equipe {
 				}
 			}while(!ok);
 		}
-		
+		System.out.println("Equipe créée !");
 		System.out.println(equipe.toString());
 		Menu.attendre();
 		return(equipe);
@@ -196,31 +201,57 @@ public class Equipe {
 	}
 	
 	public static void sauver(Hashtable<Integer,Equipe> al){
+		File file = new File("equipes.txt");
+		FileOutputStream fos = null;
+		ObjectOutputStream sortie = null;
 		try{
-			ObjectOutputStream sortie = new ObjectOutputStream(new FileOutputStream("equipes.txt"));
+			fos = new FileOutputStream(file);
+			sortie = new ObjectOutputStream(fos);
 			sortie.writeObject(al);
-			sortie.close();
 		}
 		catch(FileNotFoundException e){ System.out.println("Fichier de sauvegarde introuvable \nLe fichier est créé.\n");}
 		catch(IOException e){ System.out.println("Erreur lors de la lecture du fichier");}
+		finally{
+			if(fos!=null){
+				try{
+					fos.flush();
+					fos.close();
+				}
+				catch(Exception e){
+					System.out.println(e.getMessage());
+				}
+			}
+		}
 	}
 	
 	public static Hashtable<Integer,Equipe> charger(){
-		Hashtable<Integer,Equipe> al = new Hashtable<Integer,Equipe>();
+		Hashtable<Integer,Equipe> al = null;
+		File file = new File("equipes.txt");
+		FileInputStream fis = null;
+		ObjectInputStream entree = null;
 		try{
-			ObjectInputStream entree = new ObjectInputStream(new FileInputStream("equipes.txt"));
+			fis = new FileInputStream(file);
+			entree = new ObjectInputStream(fis);
 			al = (Hashtable<Integer,Equipe>) entree.readObject();
-			entree.close();
 		}
 		catch(FileNotFoundException e){ System.out.println("Fichier de sauvegarde introuvable");}
 		catch(IOException e){ System.out.println("Erreur lors de la lecture du fichier");}
 		catch(ClassNotFoundException e){System.out.println(e.getMessage());}
 		finally{
-			return al;
+			if(fis!=null){
+				try{
+					fis.close();
+				}
+				catch(Exception e){
+					System.out.println(e.getMessage());
+				}
+			}
+			
 		}
+		return al;
 	}
 	
-	public static Equipe selectionner(Hashtable<Integer,Equipe> al){
+	public static int selectionner(Hashtable<Integer,Equipe> al){
 		int taille = al.size();
 		for(int i = 0 ; i < taille ; i++){
 			System.out.println(i+" : \n "+al.get(i).toString()+"\n");
@@ -230,8 +261,7 @@ public class Equipe {
 			choix = Menu.lireValeur();
 			if(choix < 0 || choix > taille) System.out.println("Choix incorrect");
 		}while(choix < 0 && choix > taille);
-		Equipe e = al.get(choix);
-		return(e);
+		return(choix);
 	}
 	
 	

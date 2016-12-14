@@ -1,4 +1,5 @@
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -27,7 +28,8 @@ public class Menu {
 			
 		case 2:
 			try{
-				tournoi(initTournoi());
+				tournoi(initTournoi());			
+				
 			}catch(Exception e){
 				System.out.println(e.getMessage());
 				attendre();
@@ -42,39 +44,85 @@ public class Menu {
 	
 	public static Hashtable<Integer,Equipe> initTournoi() throws PasAssezDEquipesException{
 		Hashtable<Integer,Equipe> lesEquipes = Equipe.charger();
-		if(lesEquipes.size() < Equipe.NB_EQUIPES) throw new PasAssezDEquipesException("Vous devez avoir créé au moins "+Equipe.NB_EQUIPES+" équipes pour pouvoir lancer un tournois !");
+		Hashtable<Integer,Equipe> equipesTournoi = lesEquipes;
+		if(lesEquipes.size() < Equipe.NB_EQUIPES) throw new PasAssezDEquipesException("Il vous manque "+(Equipe.NB_EQUIPES-lesEquipes.size())+" équipes pour pouvoir lancer un tournoi !");
 		else if(lesEquipes.size() > Equipe.NB_EQUIPES){
 			int choix = 0;
-			Enumeration<Equipe> e;
-			Enumeration<Integer> k;
 			do{
-				e = lesEquipes.elements();
-				k = lesEquipes.keys();
-				while(e.hasMoreElements()){
-					System.out.println(k.nextElement()+"   :   "+e.nextElement().getClub().toString()+"\n\n");
-				}
-				System.out.println("Sur ces "+lesEquipes.size()+" équipes, seules "+Equipe.NB_EQUIPES+" peuvent participer au tournois.");
-				do{
-					System.out.println("Entrez le numéro d'une équipe qui ne participera pas au tournois : ");
-					choix = lireValeur();
-				}while(!lesEquipes.containsKey(choix));
+				choix=Equipe.selectionner(equipesTournoi);
 				
-				lesEquipes.remove(choix);
+				equipesTournoi.remove(choix);
 				
-			}while(lesEquipes.size() != Equipe.NB_EQUIPES);
+			}while(equipesTournoi.size() != Equipe.NB_EQUIPES);
 			
 		}
-		return lesEquipes;
+		Equipe.sauver(lesEquipes);
+		return equipesTournoi;
 	}
 	
 	public static void tournoi(Hashtable<Integer,Equipe> lesEquipes){
-		//TODO
+		System.out.println("---Tournoi---");
+		while(lesEquipes.size() != 1){
+			System.out.println(lesEquipes.get(3).toString());
+			lesEquipes = jouerTour(lesEquipes);
+		}
+	}
+	
+	public static Hashtable<Integer,Equipe> jouerTour(Hashtable<Integer,Equipe> lesEquipes){
+		int nbEquipes = lesEquipes.size();
+		Random rand = new Random();
+		int r1 = 0;
+		int r2 = 0;
+		Equipe equipe1 = null;
+		Equipe equipe2 = null;
+		ArrayList<Match> lesMatchs = new ArrayList<Match>();
+		
+		while(!lesEquipes.isEmpty()){
+			
+			nbEquipes = lesEquipes.size();
+			r1 = rand.nextInt(nbEquipes+1);
+			System.out.println(r1);
+			System.out.println(lesEquipes.get(1).toString());
+			attendre();
+			equipe1 = lesEquipes.get(r1);
+			lesEquipes.remove(r1);
+			System.out.println(equipe1.toString());
+			
+			nbEquipes = lesEquipes.size();
+			r2 = rand.nextInt(nbEquipes+1);
+			System.out.println(r2);
+			attendre();
+			equipe1 = lesEquipes.get(r2);
+			lesEquipes.remove(r2);
+			
+			System.out.println(equipe2.toString());
+			attendre();
+			
+			System.out.println("Match entre "+equipe1.toString()+" et "+equipe2.toString());
+			
+			attendre();
+			lesMatchs.add(new Match(equipe1,equipe2,Arbitre.creerArbitre())); 
+			//TODO : sauvegarde des arbitres
+		}
+		try{
+			Tour tour = new Tour(lesMatchs);
+			System.out.println(tour.toString());
+			attendre();
+			//TODO : sauvegarde des tours
+			return(tour.getLesGagnants());
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+			attendre();
+			return null;//a changer
+			//menuPrincipal();
+		}
 	}
 	
 	public static void gestionEquipes(){
-		int choix = 0;
+		int choix = 0, nbEquipes = 0;
 		Hashtable<Integer,Equipe> lesEquipes = Equipe.charger();
-		int nbEquipes = lesEquipes.size();
+		if(lesEquipes!=null) nbEquipes = lesEquipes.size();
+		else lesEquipes = new Hashtable<Integer,Equipe>();
 		
 		do{
 			System.out.println("----- GESTION EQUIPES -----");
@@ -91,7 +139,7 @@ public class Menu {
 					System.out.println(e.getMessage());
 				}	
 			}while(choix < 1 || choix > 4);
-			nbEquipes = lesEquipes.size();
+			if(lesEquipes!=null) nbEquipes = lesEquipes.size();
 			switch(choix){
 			case 1: 
 				lesEquipes.put(nbEquipes,Equipe.creerEquipe());
@@ -103,6 +151,7 @@ public class Menu {
 				}else{
 					System.out.println("Pas d'équipes enregistrées");
 				}
+				attendre();
 				break;
 			case 3:
 				if(nbEquipes!=0){
@@ -299,6 +348,7 @@ public class Menu {
 		do{
 			try{
 				s = sc.next();
+	
 				return s;
 			}catch(Exception e){
 				System.out.println("Valeur incorrecte !");
@@ -341,6 +391,7 @@ public class Menu {
 		do{
 			try{
 				st = new StringTokenizer(sc.next(),"/");
+	
 				jour = Integer.parseInt(st.nextToken());
 				mois = Integer.parseInt(st.nextToken());
 				annee = Integer.parseInt(st.nextToken());

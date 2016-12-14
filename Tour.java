@@ -11,14 +11,14 @@ public class Tour {
 	private int numTour;
 	private ArrayList<Match> lesMatchs;
 
-	public Tour(int num, ArrayList<Match> matchs)
+	public Tour(ArrayList<Match> matchs)
 		throws NombreEquipesIncorrectException{
 		if(!testPuissanceDe2(matchs.size())){
 			throw new NombreEquipesIncorrectException("Le nombre d'équipes doit etre une puissance de 2 !");
 		}
 		else{
-			numTour = num;
 			lesMatchs = matchs;
+			numTour = calculerNumTour();
 		}
 	}
 	
@@ -28,10 +28,20 @@ public class Tour {
 		else return testPuissanceDe2(n/2);
 	}
 	
-	public ArrayList<Equipe> getLesGagnants(){
-		ArrayList<Equipe> lesGagnants = new ArrayList<Equipe>();
+	private int calculerNumTour(){
+		int n = 1;
+		int max = Equipe.NB_EQUIPES;
+		while(max!=this.lesMatchs.size()){
+			max = max/2;
+			n++;
+		}
+		return n;
+	}
+	
+	public Hashtable<Integer,Equipe> getLesGagnants(){
+		Hashtable<Integer,Equipe> lesGagnants = new Hashtable<Integer,Equipe>();
 		for(int i = 0 ; i < lesMatchs.size() ; i++){
-			lesGagnants.add(lesMatchs.get(i).getGagnant());
+			lesGagnants.put(i+1,lesMatchs.get(i).getGagnant());
 		}
 		return lesGagnants;
 	}
@@ -44,7 +54,7 @@ public class Tour {
 		return s+"\n";
 	}
 	
-	public static void sauver(Hashtable<Integer,Tour> lesTours){
+	public static void sauver(Hashtable<Integer,Tour> lesTours){//Les sauvegarder 1 par 1 plutot 
 		try{
 			ObjectOutputStream sortie = new ObjectOutputStream(new FileOutputStream("equipes.txt"));
 			sortie.writeObject(lesTours);

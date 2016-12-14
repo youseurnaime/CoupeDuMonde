@@ -1,9 +1,9 @@
-import java.io.*;
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public abstract class Licencie implements Serializable {
+public abstract class Licencie implements Serializable{
 	private int numLicence;
 	private String nom;
 	private String prenom;

@@ -18,6 +18,7 @@ public class Arbitre extends Licencie {
 	
 	
 	public static Arbitre creerArbitre(){
+		System.out.println("Création d'arbitre");
 		System.out.println("Entrez le numero de licence :");
 		int numLicence = Menu.lireValeur();
 		System.out.println("Entrez le nom : ");
