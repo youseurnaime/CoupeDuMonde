@@ -63,7 +63,6 @@ public class Menu {
 	public static void tournoi(Hashtable<Integer,Equipe> lesEquipes){
 		System.out.println("---Tournoi---");
 		while(lesEquipes.size() != 1){
-			System.out.println(lesEquipes.get(3).toString());
 			lesEquipes = jouerTour(lesEquipes);
 		}
 	}
@@ -81,18 +80,18 @@ public class Menu {
 			
 			nbEquipes = lesEquipes.size();
 			r1 = rand.nextInt(nbEquipes+1);
-			System.out.println(r1);
-			System.out.println(lesEquipes.get(1).toString());
-			attendre();
+			//System.out.println(r1);
+			//System.out.println(lesEquipes.get(1).toString());
+			//attendre();
 			equipe1 = lesEquipes.get(r1);
 			lesEquipes.remove(r1);
-			System.out.println(equipe1.toString());
+			//System.out.println(equipe1.toString());
 			
 			nbEquipes = lesEquipes.size();
 			r2 = rand.nextInt(nbEquipes+1);
-			System.out.println(r2);
-			attendre();
-			equipe1 = lesEquipes.get(r2);
+			//System.out.println(r2);
+			//attendre();
+			equipe2 = lesEquipes.get(r2);
 			lesEquipes.remove(r2);
 			
 			System.out.println(equipe2.toString());
@@ -117,6 +116,7 @@ public class Menu {
 			//menuPrincipal();
 		}
 	}
+	
 	
 	public static void gestionEquipes(){
 		int choix = 0, nbEquipes = 0;
@@ -334,7 +334,7 @@ public class Menu {
 	}*/
 	
 	public static void attendre(){
-		System.out.println("Entrez une valeur pour continuer...");
+		System.out.println("Entrez une lettre pour continuer...");
 		try{
 			Scanner sc = new Scanner(System.in);
 			sc.nextInt();
