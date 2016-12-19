@@ -6,13 +6,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
 public class Equipe implements Serializable{
-	final static int NB_EQUIPES = 16;
-	final static int NB_JOUEURS = 9;
+	public int id;
 	private Hashtable<Integer,Joueur> lesJoueurs;
 	private Hashtable<Integer,Joueur>  lesRemplacants;
 	private Club club;
@@ -20,8 +20,9 @@ public class Equipe implements Serializable{
 	private int nbVictoires = 0;
 	private int nbDefaites = 0;
 	
-	public Equipe(Club club){
+	public Equipe(Club club, int id){
 		this.club = club;
+		this.id = id;
 		lesJoueurs = new Hashtable<Integer,Joueur>();
 		lesRemplacants = new Hashtable<Integer,Joueur>();
 		
@@ -34,6 +35,13 @@ public class Equipe implements Serializable{
 		this.entraineur = entraineur;
 	}
 	
+	public boolean equals(Equipe e){
+		return(e.id==id);
+	}
+	
+	public String getVictoiresDefaites(){
+		return ("Victoires : "+nbVictoires+" Défaites : "+nbDefaites);
+	}
 	public void victoire(){
 		nbVictoires++;
 	}
@@ -46,8 +54,22 @@ public class Equipe implements Serializable{
 		return club;
 	}
 	
+	public int getNbJoueurs(){
+		return lesJoueurs.size();
+	}
+	
 	private void trierJoueurs(){
 		//TODO
+	}
+	
+	public Joueur getGardien(){
+		Joueur j = null;
+		Enumeration<Integer> k = lesJoueurs.keys();
+		while(k.hasMoreElements()){
+			j = lesJoueurs.get(k.nextElement());
+			if(j.estGardien()) return j;
+		}
+		return null;
 	}
 	
 	public void ajouterEntraineur() 
@@ -56,9 +78,6 @@ public class Equipe implements Serializable{
 		Entraineur ent;
 		System.out.println("Création de l'entraineur :");
 		ent = Entraineur.creerEntraineur(club);
-		
-		//System.out.println(ent.getDate().toString());
-		//Menu.attendre();
 		
 		try{
 			if(!club.equals(ent.getClub())) throw(new ClubIncorrectException("Erreur : l'entraineur appartient à un autre club !"));
@@ -118,14 +137,14 @@ public class Equipe implements Serializable{
 		lesRemplacants.put(joueurAjoute.getNumLicence(),joueurAjoute);
 	}
 	
-	public static Equipe creerEquipe(){
+	public static Equipe creerEquipe(int id){
 		System.out.println("-----Créateur d'équipe-----");
 		
 		System.out.println("Entrez la ville de l'équipe : ");
 		String ville = Menu.lireMot();
 		System.out.println("Entrez le nom de l'équipe : ");
 		String nom = Menu.lireMot();
-		Equipe equipe = new Equipe(new Club(nom,ville));
+		Equipe equipe = new Equipe(new Club(nom,ville),id);
 		boolean ok = false;
 		
 		do{
@@ -147,7 +166,7 @@ public class Equipe implements Serializable{
 			}
 		}while(!ok);
 			
-		for(int i = 1 ; i < NB_JOUEURS ; i++){
+		for(int i = 1 ; i < Menu.NB_JOUEURS ; i++){
 			ok=false;
 			do{
 				try{
@@ -200,14 +219,14 @@ public class Equipe implements Serializable{
 		return s;
 	}
 	
-	public static void sauver(Hashtable<Integer,Equipe> al){
+	public static void sauver(Hashtable<Integer,Equipe> ht){
 		File file = new File("equipes.txt");
 		FileOutputStream fos = null;
 		ObjectOutputStream sortie = null;
 		try{
 			fos = new FileOutputStream(file);
 			sortie = new ObjectOutputStream(fos);
-			sortie.writeObject(al);
+			sortie.writeObject(ht);
 		}
 		catch(FileNotFoundException e){ System.out.println("Fichier de sauvegarde introuvable \nLe fichier est créé.\n");}
 		catch(IOException e){ System.out.println("Erreur lors de la lecture du fichier");}
@@ -225,14 +244,14 @@ public class Equipe implements Serializable{
 	}
 	
 	public static Hashtable<Integer,Equipe> charger(){
-		Hashtable<Integer,Equipe> al = null;
+		Hashtable<Integer,Equipe> ht = null;
 		File file = new File("equipes.txt");
 		FileInputStream fis = null;
 		ObjectInputStream entree = null;
 		try{
 			fis = new FileInputStream(file);
 			entree = new ObjectInputStream(fis);
-			al = (Hashtable<Integer,Equipe>) entree.readObject();
+			ht = (Hashtable<Integer,Equipe>) entree.readObject();
 		}
 		catch(FileNotFoundException e){ System.out.println("Fichier de sauvegarde introuvable");}
 		catch(IOException e){ System.out.println("Erreur lors de la lecture du fichier");}
@@ -248,21 +267,50 @@ public class Equipe implements Serializable{
 			}
 			
 		}
-		return al;
+		return ht;
 	}
 	
-	public static int selectionner(Hashtable<Integer,Equipe> al){
-		int taille = al.size();
-		for(int i = 0 ; i < taille ; i++){
-			System.out.println(i+" : \n "+al.get(i).toString()+"\n");
+	public static int selectionner(Hashtable<Integer,Equipe> ht){
+		Enumeration<Integer> enumId = ht.keys();
+		Enumeration<Equipe> enumEquipe = ht.elements();
+		
+		if(ht == null) System.out.println("Pas d'équipes enregistrées");
+		else{
+			while(enumId.hasMoreElements()){
+				System.out.println(enumId.nextElement()+"   :   "+enumEquipe.nextElement().toString()+"\n\n");
+			}
 		}
-		int choix = 0;
+		
+		int choix = -1;
 		do{
 			choix = Menu.lireValeur();
-			if(choix < 0 || choix > taille) System.out.println("Choix incorrect");
-		}while(choix < 0 && choix > taille);
+			if(ht.containsKey(choix)) System.out.println("Choix incorrect");
+		}while(ht.containsKey(choix));
 		return(choix);
 	}
 	
+	public static void ajouterVictoire(int id){
+		try{
+			Hashtable<Integer,Equipe> lesEquipes = charger();
+			Equipe equipe = lesEquipes.get(id);
+			equipe.victoire();
+			lesEquipes.replace(id, equipe);
+			sauver(lesEquipes);
+		}catch(Exception e){
+			System.out.println("Ajout de victoire impossible !");
+		}
+	}
+	
+	public static void ajouterDefaite(int id){
+		try{
+			Hashtable<Integer,Equipe> lesEquipes = charger();
+			Equipe equipe = lesEquipes.get(id);
+			equipe.defaite();
+			lesEquipes.replace(id, equipe);
+			sauver(lesEquipes);
+		}catch(Exception e){
+			System.out.println("Ajout de défaite impossible !");
+		}
+	}
 	
 }

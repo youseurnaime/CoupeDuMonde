@@ -1,36 +1,18 @@
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Hashtable;
 
-public class Tour {
+public class Tour implements Serializable {
 	private int numTour;
 	private ArrayList<Match> lesMatchs;
 
-	public Tour(ArrayList<Match> matchs)
-		throws NombreEquipesIncorrectException{
-		if(!testPuissanceDe2(matchs.size())){
-			throw new NombreEquipesIncorrectException("Le nombre d'équipes doit etre une puissance de 2 !");
-		}
-		else{
-			lesMatchs = matchs;
-			numTour = calculerNumTour();
-		}
-	}
-	
-	public static boolean testPuissanceDe2(int n){
-		if((n%2)!=0) return false;
-		if((n/2)==1) return true;
-		else return testPuissanceDe2(n/2);
+	public Tour(ArrayList<Match> matchs){
+		lesMatchs = matchs;
+		numTour = calculerNumTour();
 	}
 	
 	private int calculerNumTour(){
 		int n = 1;
-		int max = Equipe.NB_EQUIPES;
+		int max = Menu.NB_EQUIPES/2;
 		while(max!=this.lesMatchs.size()){
 			max = max/2;
 			n++;
@@ -38,45 +20,27 @@ public class Tour {
 		return n;
 	}
 	
-	public Hashtable<Integer,Equipe> getLesGagnants(){
-		Hashtable<Integer,Equipe> lesGagnants = new Hashtable<Integer,Equipe>();
+	public ArrayList<Equipe> getLesGagnants(){
+		ArrayList<Equipe> lesGagnants = new ArrayList<Equipe>();
 		for(int i = 0 ; i < lesMatchs.size() ; i++){
-			lesGagnants.put(i+1,lesMatchs.get(i).getGagnant());
+			lesGagnants.add(lesMatchs.get(i).getGagnant());
 		}
 		return lesGagnants;
 	}
 	
 	public String toString(){
-		String s = "Tour n°"+numTour;
+		String s = "Tour n°"+numTour+"\n\n";
+		s += "Equipes : \n";
 		for(int i = 0 ; i < lesMatchs.size() ; i++){
-			s += lesMatchs.get(i).toString();
+			s+= lesMatchs.get(i).getEquipeA().getClub().toString() + "\n";
+			s+= lesMatchs.get(i).getEquipeB().getClub().toString() + "\n";
+		}
+		s += "\nRencontres : \n";
+		for(int i = 0 ; i < lesMatchs.size() ; i++){
+			s += lesMatchs.get(i).toString()+"\n\n";
 		}
 		return s+"\n";
 	}
 	
-	public static void sauver(Hashtable<Integer,Tour> lesTours){//Les sauvegarder 1 par 1 plutot 
-		try{
-			ObjectOutputStream sortie = new ObjectOutputStream(new FileOutputStream("equipes.txt"));
-			sortie.writeObject(lesTours);
-			sortie.close();
-		}
-		catch(FileNotFoundException e){ System.out.println("Fichier de sauvegarde introuvable \nLe fichier est créé.\n");}
-		catch(IOException e){ System.out.println("Erreur lors de la lecture du fichier");}
-	}
-	
-	public static Hashtable<Integer,Tour> charger(){
-		Hashtable<Integer,Tour> lesTours = new Hashtable<Integer,Tour>();
-		try{
-			ObjectInputStream entree = new ObjectInputStream(new FileInputStream("equipes.txt"));
-			lesTours = (Hashtable<Integer,Tour>) entree.readObject();
-			entree.close();
-		}
-		catch(FileNotFoundException e){ System.out.println("Fichier de sauvegarde introuvable");}
-		catch(IOException e){ System.out.println("Erreur lors de la lecture du fichier");}
-		catch(ClassNotFoundException e){System.out.println(e.getMessage());}
-		finally{
-			return lesTours;
-		}
-	}
 	
 }

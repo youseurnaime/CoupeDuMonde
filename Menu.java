@@ -1,34 +1,42 @@
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Menu {
 
+	static int NB_JOUEURS = 9;
+	static int NB_EQUIPES = 16;
+	static boolean SIMULER_MATCHS = true;
+	
 	public static void main(String[] args) {
 		menuPrincipal();
 	}
 	
 	public static void menuPrincipal(){
-		System.out.println("----- MENU PRINCIPAL -----");
+		System.out.println("• • MENU PRINCIPAL • •");
 		System.out.println("Que souhaitez vous faire ?");
-		System.out.println("1 : Gestion des équipes");
-		System.out.println("2 : Nouveau tournoi");
-		System.out.println("3 : Quitter");
+		System.out.println("1 : Nouveau Tournoi");
+		System.out.println("2 : Gestion des équipes");
+		System.out.println("3 : Gestion des arbitres");
+		System.out.println("4 : Historique des tournois");
+		System.out.println("5 : Historique des matchs");
+		System.out.println("6 : Paramètres");
+		System.out.println("7 : Quitter");
 		
 		int choix = 0;
 		do{
 			choix = lireValeur();
-		}while(choix < 1 || choix > 2);
+		}while(choix < 1 || choix > 7);
 		
 		switch(choix){
 		case 1: 
-			gestionEquipes();
-			break;
-			
-		case 2:
 			try{
-				tournoi(initTournoi());			
+				Hashtable<String,Tournoi> lesTournois = Tournoi.charger();
+				if(lesTournois == null) lesTournois = new Hashtable<String,Tournoi>();
+				Tournoi t = new Tournoi();	
+				lesTournois.put(t.getID(),t);
+				Tournoi.sauver(lesTournois);
+				menuPrincipal();
 				
 			}catch(Exception e){
 				System.out.println(e.getMessage());
@@ -36,87 +44,146 @@ public class Menu {
 				menuPrincipal();
 			}
 			break;
+		case 2:
+			gestionEquipes();
+			break;
 			
 		case 3:
+			gestionArbitres();
+			break;
+		case 4:
+			historiqueTournois();
+			break;
+		case 5:
+			System.out.println(Match.getListeMatchs() + "\n");
+			attendre();
+			menuPrincipal();
+		case 6:
+			parametres();
+			break;
+		case 7:
+			System.exit(0);
 			break;
 		}
 	}
 	
-	public static Hashtable<Integer,Equipe> initTournoi() throws PasAssezDEquipesException{
-		Hashtable<Integer,Equipe> lesEquipes = Equipe.charger();
-		Hashtable<Integer,Equipe> equipesTournoi = lesEquipes;
-		if(lesEquipes.size() < Equipe.NB_EQUIPES) throw new PasAssezDEquipesException("Il vous manque "+(Equipe.NB_EQUIPES-lesEquipes.size())+" équipes pour pouvoir lancer un tournoi !");
-		else if(lesEquipes.size() > Equipe.NB_EQUIPES){
+	private static void parametres(){
+		do{
+			System.out.println("• • PARAMETRES • •");
+			System.out.println("/!\\ Attention, en modifiant ces paramètres certaines sauvegardes peuvent être perdues /!\\");
+			System.out.println("Que souhaitez vous modifier ?");
+			System.out.println("1 : Nombre de joueurs par équipe = "+NB_JOUEURS);
+			System.out.println("2 : Nombre d'équipes par tournoi = "+NB_EQUIPES);
+			if(SIMULER_MATCHS) System.out.println("3 : Simuler les matchs = Activé");
+			else System.out.println("3 : Simuler les matchs = Désactivé");
+			System.out.println("4 : Retour");
+			
 			int choix = 0;
 			do{
-				choix=Equipe.selectionner(equipesTournoi);
-				
-				equipesTournoi.remove(choix);
-				
-			}while(equipesTournoi.size() != Equipe.NB_EQUIPES);
+				choix = lireValeur();
+			}while(choix < 1 || choix > 4);
 			
-		}
-		Equipe.sauver(lesEquipes);
-		return equipesTournoi;
-	}
-	
-	public static void tournoi(Hashtable<Integer,Equipe> lesEquipes){
-		System.out.println("---Tournoi---");
-		while(lesEquipes.size() != 1){
-			lesEquipes = jouerTour(lesEquipes);
-		}
-	}
-	
-	public static Hashtable<Integer,Equipe> jouerTour(Hashtable<Integer,Equipe> lesEquipes){
-		int nbEquipes = lesEquipes.size();
-		Random rand = new Random();
-		int r1 = 0;
-		int r2 = 0;
-		Equipe equipe1 = null;
-		Equipe equipe2 = null;
-		ArrayList<Match> lesMatchs = new ArrayList<Match>();
+			switch(choix){
+			case 1:
+				System.out.println("Combien de joueurs dans une équipe, remplaçants non compris ?");
+				do{
+					choix = lireValeur();
+				}while(choix < 1);
+				NB_JOUEURS = choix;
+				break;
+			case 2:
+				System.out.println("Combien d'équipe dans un tournoi ? (Entrez une puissance de 2)");
+				do{
+					choix = lireValeur();
+				}while(!Tournoi.estPuissanceDe2(choix) || choix < 2);
+				NB_EQUIPES = choix;
+				break;
+			case 3:
+				if(SIMULER_MATCHS) SIMULER_MATCHS = false;
+				else SIMULER_MATCHS = true;
+				break;
+			case 4:
+				menuPrincipal();
+				break;
+				
+			}
+		}while(true);
 		
-		while(!lesEquipes.isEmpty()){
-			
-			nbEquipes = lesEquipes.size();
-			r1 = rand.nextInt(nbEquipes+1);
-			//System.out.println(r1);
-			//System.out.println(lesEquipes.get(1).toString());
-			//attendre();
-			equipe1 = lesEquipes.get(r1);
-			lesEquipes.remove(r1);
-			//System.out.println(equipe1.toString());
-			
-			nbEquipes = lesEquipes.size();
-			r2 = rand.nextInt(nbEquipes+1);
-			//System.out.println(r2);
-			//attendre();
-			equipe2 = lesEquipes.get(r2);
-			lesEquipes.remove(r2);
-			
-			System.out.println(equipe2.toString());
+	}
+	
+	private static void historiqueTournois(){
+		Hashtable<String,Tournoi> lesTournois = Tournoi.charger();
+		if(lesTournois == null){
+			System.out.println("Vous n'avez pas de tournois enregistrés.");
 			attendre();
-			
-			System.out.println("Match entre "+equipe1.toString()+" et "+equipe2.toString());
-			
-			attendre();
-			lesMatchs.add(new Match(equipe1,equipe2,Arbitre.creerArbitre())); 
-			//TODO : sauvegarde des arbitres
+			menuPrincipal();
 		}
-		try{
-			Tour tour = new Tour(lesMatchs);
-			System.out.println(tour.toString());
-			attendre();
-			//TODO : sauvegarde des tours
-			return(tour.getLesGagnants());
-		}catch(Exception e){
-			System.out.println(e.getMessage());
-			attendre();
-			return null;//a changer
-			//menuPrincipal();
+		else{
+			do{
+				String tournoiSelectionne = Tournoi.selectionner(lesTournois);
+				if(lesTournois.containsKey(tournoiSelectionne)){
+					System.out.println(lesTournois.get(tournoiSelectionne).toString()+"\n");
+					attendre();
+					
+				}
+				else menuPrincipal();
+			}while(true);
 		}
 	}
 	
+	public static void gestionArbitres(){
+		int choix = 0, nbArbitres = 0;
+		ArrayList<Arbitre> lesArbitres = Arbitre.charger();
+		if(lesArbitres!=null) nbArbitres = lesArbitres.size();
+		else lesArbitres = new ArrayList<Arbitre>();
+		
+		do{
+			System.out.println("• • GESTION DES ARBITRES • •");
+			System.out.println("Que souhaitez vous faire ?");
+			System.out.println("1 : Nouvel arbitre");
+			System.out.println("2 : Supprimer arbitre");
+			System.out.println("3 : Voir les arbitres");
+			System.out.println("4 : Retour");
+			do{
+				try{
+					choix = lireValeur();
+				}
+				catch(Exception e){
+					System.out.println(e.getMessage());
+				}	
+			}while(choix < 1 || choix > 4);
+			if(lesArbitres!=null) nbArbitres = lesArbitres.size();
+			switch(choix){
+			case 1: 
+				lesArbitres.add(Arbitre.creerArbitre());
+				break;
+			case 2:
+				if(nbArbitres!=0){
+					System.out.println("Sélectionnez l'arbitre que vous voulez supprimer : ");
+					lesArbitres.remove(Arbitre.selectionner(lesArbitres));
+				}else{
+					System.out.println("Pas d'arbitres enregistrés");
+				}
+				attendre();
+				break;
+			case 3:
+				if(nbArbitres!=0){
+					for(int i = 0 ; i < nbArbitres ; i++){
+						System.out.println(i+"   :   "+lesArbitres.get(i).toString()+"\n");
+					}
+				}else{
+					System.out.println("Pas d'arbitres enregistrés");
+				}
+				attendre();
+				break;
+			case 4:
+				Arbitre.sauver(lesArbitres);
+				menuPrincipal();
+				break;
+			}
+			Arbitre.sauver(lesArbitres);
+		}while(true);
+	}
 	
 	public static void gestionEquipes(){
 		int choix = 0, nbEquipes = 0;
@@ -125,7 +192,7 @@ public class Menu {
 		else lesEquipes = new Hashtable<Integer,Equipe>();
 		
 		do{
-			System.out.println("----- GESTION EQUIPES -----");
+			System.out.println("• • GESTION EQUIPES • •");
 			System.out.println("Que souhaitez vous faire ?");
 			System.out.println("1 : Nouvelle équipe");
 			System.out.println("2 : Supprimer équipe");
@@ -142,12 +209,14 @@ public class Menu {
 			if(lesEquipes!=null) nbEquipes = lesEquipes.size();
 			switch(choix){
 			case 1: 
-				lesEquipes.put(nbEquipes,Equipe.creerEquipe());
+				nbEquipes++;
+				lesEquipes.put(nbEquipes, Equipe.creerEquipe(nbEquipes));
 				break;
 			case 2:
 				if(nbEquipes!=0){
 					System.out.println("Sélectionnez celle que vous voulez supprimer : ");
 					lesEquipes.remove(Equipe.selectionner(lesEquipes));
+					nbEquipes--;
 				}else{
 					System.out.println("Pas d'équipes enregistrées");
 				}
@@ -155,10 +224,8 @@ public class Menu {
 				break;
 			case 3:
 				if(nbEquipes!=0){
-					Enumeration<Equipe> e = lesEquipes.elements();
-					Enumeration<Integer> k = lesEquipes.keys();
-					while(e.hasMoreElements()){
-						System.out.println(k.nextElement()+"   :   "+e.nextElement().toString()+"\n\n");
+					for(int i = 1 ; i <= nbEquipes ; i++){
+						System.out.println(i+"   :   "+lesEquipes.get(i).toString()+"\n\n");
 					}
 				}else{
 					System.out.println("Pas d'équipes enregistrées");
@@ -174,165 +241,6 @@ public class Menu {
 		}while(true);
 	}
 	
-	/*public static void gestionLicencies(){
-		System.out.println("----- GESTION LICENCIES -----");
-		System.out.println("Que souhaitez vous faire ?");
-		System.out.println("1 : Gestion des joueurs");
-		System.out.println("2 : Gestion des entraineurs");
-		System.out.println("3 : Gestion des arbitres");
-		System.out.println("4 : Retour");
-		int choix = 0;
-		do{
-			choix = lireValeur();
-		}while(choix < 1 || choix > 4);
-		
-		switch(choix){
-		case 1: 
-			gestionJoueurs();
-			break;
-		case 2:
-			gestionEntraineurs();
-			break;
-		case 3:
-			gestionArbitres();
-			break;
-		case 4:
-			menuPrincipal();
-			break;
-		}
-	}
-	
-	public static void gestionJoueurs(){
-		int choix = 0;
-		File f = new File("joueurs.txt");
-		ArrayList<Licencie> lesJoueurs = Licencie.charger(f);
-		
-		do{
-			System.out.println("----- GESTION JOUEURS -----");
-			System.out.println("Que souhaitez vous faire ?");
-			System.out.println("1 : Nouveau joueur");
-			System.out.println("2 : Supprimer joueur");
-			System.out.println("3 : Voir les joueurs");
-			System.out.println("4 : Retour");
-			try{
-				do{
-					choix = lireValeur();
-				}while(choix < 1 || choix > 4);
-			}
-			catch(Exception e){
-				System.out.println(e.getMessage());
-			}
-			
-			switch(choix){
-			case 1: 
-				lesJoueurs.add(Joueur.creerJoueur());
-				break;
-			case 2:
-				System.out.println("Sélectionnez celui que vous voulez supprimer : ");
-				lesJoueurs.remove(Licencie.selectionner(lesJoueurs));
-				break;
-			case 3:
-				for(Licencie j: lesJoueurs){
-					System.out.println(j.toString());
-				}
-				attendre();
-				break;
-			case 4:
-				Licencie.sauver(f, lesJoueurs);
-				gestionLicencies();
-				break;
-			}
-		}while(true);
-	}
-	
-	public static void gestionEntraineurs(){
-		int choix = 0;
-		File f = new File("entraineurs.txt");
-		ArrayList<Licencie> lesEntraineurs = Licencie.charger(f);
-		
-		do{
-			System.out.println("----- GESTION ENTRAINEURS -----");
-			System.out.println("Que souhaitez vous faire ?");
-			System.out.println("1 : Nouvel entraineur");
-			System.out.println("2 : Supprimer entraineur");
-			System.out.println("3 : Voir les entraineurs");
-			System.out.println("4 : Retour");
-			try{
-				do{
-					choix = lireValeur();
-				}while(choix < 1 || choix > 4);
-			}
-			catch(Exception e){
-				System.out.println(e.getMessage());
-			}
-			
-			switch(choix){
-			case 1: 
-				lesEntraineurs.add(Entraineur.creerEntraineur());
-				break;
-			case 2:
-				System.out.println("Sélectionnez celui que vous voulez supprimer : ");
-				lesEntraineurs.remove(Licencie.selectionner(lesEntraineurs));
-				break;
-			case 3:
-				int taille = lesEntraineurs.size();
-				for(int i = 0 ; i < taille ; i++){
-					System.out.println(i+" : "+lesEntraineurs.get(i).toString());
-				}
-				attendre();
-				break;
-			case 4:
-				Licencie.sauver(f, lesEntraineurs);
-				gestionLicencies();
-				break;
-			}
-		}while(true);
-	}
-	
-	public static void gestionArbitres(){
-		int choix = 0;
-		File f = new File("arbitres.txt");
-		ArrayList<Licencie> lesArbitres = Licencie.charger(f);
-		
-		do{
-			System.out.println("----- GESTION ARBITRES -----");
-			System.out.println("Que souhaitez vous faire ?");
-			System.out.println("1 : Nouvel arbitre");
-			System.out.println("2 : Supprimer arbitre");
-			System.out.println("3 : Voir les arbitres");
-			System.out.println("4 : Retour");
-			try{
-				do{
-					choix = lireValeur();
-				}while(choix < 1 || choix > 4);
-			}
-			catch(Exception e){
-				System.out.println(e.getMessage());
-			}
-			
-			switch(choix){
-			case 1: 
-				lesArbitres.add(Arbitre.creerArbitre());
-				break;
-			case 2:
-				System.out.println("Sélectionnez celui que vous voulez supprimer : ");
-				lesArbitres.remove(Licencie.selectionner(lesArbitres));
-				break;
-			case 3:
-				int taille = lesArbitres.size();
-				for(int i = 0 ; i < taille ; i++){
-					System.out.println(i+" : "+lesArbitres.get(i).toString());
-				}
-				attendre();
-				break;
-			case 4:
-				Licencie.sauver(f, lesArbitres);
-				gestionLicencies();
-				break;
-			}
-		}while(true);
-	}*/
-	
 	public static void attendre(){
 		System.out.println("Entrez une lettre pour continuer...");
 		try{
@@ -340,6 +248,9 @@ public class Menu {
 			sc.nextInt();
 			sc.close();
 		}catch(Exception e){}
+		finally{
+			System.out.println("\n");
+		}
 	}
 	
 	public static String lireMot(){

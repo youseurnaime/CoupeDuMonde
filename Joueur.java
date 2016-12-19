@@ -1,6 +1,6 @@
 import java.util.Date;
 
-public class Joueur extends Licencie{
+public class Joueur extends Licencie {
 	private boolean gardien;
 	private int numMaillot;
 	
@@ -74,25 +74,5 @@ public class Joueur extends Licencie{
 		int numMaillot = Menu.lireValeur();
 		return(new Joueur(numLicence,nom,prenom,date,club,gardien,numMaillot));		
 	}
-	
-	/*public static Joueur selectionner(File f, Club club) throws ClubIncorrectException{
-		ArrayList<Licencie> al = charger(f);
-		int taille = al.size();
-		for(int i = 0 ; i < taille ; i++){
-			System.out.println(i+" : "+al.get(i).toString());
-		}
-		int choix = 0;
-		Scanner sc = new Scanner(System.in);
-		do{
-			choix = sc.nextInt();
-			if(choix < 0 || choix > taille) System.out.println("Choix incorrect");
-		}while(choix < 0 && choix > taille);
-		Joueur j = (Joueur) al.get(choix);
-		if(j.getClub()!=club) throw new ClubIncorrectException();
-		al.remove(choix);
-		sauver(f,al);
-		return(j);
-	}
-*/
 	
 }
