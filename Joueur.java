@@ -24,26 +24,6 @@ public class Joueur extends Licencie {
 		return numMaillot;
 	}
 	
-	public static Joueur creerJoueur(){
-		System.out.println("Entrez le numero de licence :");
-		int numLicence = Menu.lireValeur();
-		System.out.println("Entrez le nom : ");
-		String nom = Menu.lireMot();
-		System.out.println("Entrez le prénom : ");
-		String prenom = Menu.lireMot();
-		System.out.println("Entrez la date de validité de la licence (JJ/MM/AAAA)");
-		Date date = Menu.lireDate();
-		System.out.println("Entrez le nom du club : ");
-		String equipe = Menu.lireMot();
-		System.out.println("Entrez la ville du club : ");
-		String ville = Menu.lireMot();
-		Club club = new Club(equipe,ville);
-		System.out.println("Est-ce un gardien ? (O/N)");
-		boolean gardien = Menu.lireON();
-		System.out.println("Entrez le numéro de maillot : ");
-		int numMaillot = Menu.lireValeur();
-		return(new Joueur(numLicence,nom,prenom,date,club,gardien,numMaillot));		
-	}
 	
 	public static Joueur creerJoueur(Club club){
 		System.out.println("Entrez le numero de licence :");

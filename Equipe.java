@@ -72,7 +72,7 @@ public class Equipe implements Serializable{
 		return null;
 	}
 	
-	public void ajouterEntraineur() 
+	private void ajouterEntraineur() 
 			throws ClubIncorrectException, LicencePerimeeException{
 		Date d=new Date();
 		Entraineur ent;
@@ -89,7 +89,7 @@ public class Equipe implements Serializable{
 		}
 	}
 	
-	public void ajouterJoueur(int indice) 
+	private void ajouterJoueur(int indice) 
 			throws ClubIncorrectException, JoueurEnDoubleException, LicencePerimeeException, PlusieursGardiensException{
 		
 		Date d=new Date();
@@ -108,7 +108,7 @@ public class Equipe implements Serializable{
 	}
 
 	
-	public void ajouterGardien() 
+	private void ajouterGardien() 
 			throws ClubIncorrectException, JoueurEnDoubleException, LicencePerimeeException, PlusieursGardiensException{
 		Joueur joueurAjoute;
 		Date d=new Date();
@@ -123,7 +123,7 @@ public class Equipe implements Serializable{
 		this.lesJoueurs.put(joueurAjoute.getNumLicence(),joueurAjoute);
 	}
 	
-	public void ajouterRemplacant(int indice) 
+	private void ajouterRemplacant(int indice) 
 			throws ClubIncorrectException, JoueurEnDoubleException, LicencePerimeeException{
 		Joueur joueurAjoute;
 		Date d=new Date();
@@ -253,8 +253,8 @@ public class Equipe implements Serializable{
 			entree = new ObjectInputStream(fis);
 			ht = (Hashtable<Integer,Equipe>) entree.readObject();
 		}
-		catch(FileNotFoundException e){ System.out.println("Fichier de sauvegarde introuvable");}
-		catch(IOException e){ System.out.println("Erreur lors de la lecture du fichier");}
+		catch(FileNotFoundException e){}
+		catch(IOException e){ System.out.println("Suite à une fermeture innatendue, les équipes sauvegardées ont été perdues. Veuillez recréer des équipes.");}
 		catch(ClassNotFoundException e){System.out.println(e.getMessage());}
 		finally{
 			if(fis!=null){

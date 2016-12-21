@@ -29,7 +29,8 @@ public class Match implements Serializable{
 		Date dateDebut = new Date();
 		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy' 'HH'h'mm");
 		heureDebut = dateFormat.format(dateDebut);
-		aVainqueur = simulerMatch();
+		if(Menu.SIMULER_MATCHS) aVainqueur = simulerMatch();
+		else aVainqueur = jouerMatch();
 		sauver();
 	}
 	
@@ -38,35 +39,25 @@ public class Match implements Serializable{
 		else return equipeB;
 	}
 	
-	public boolean simulerMatch(){
-		int event = 0;
+	private boolean jouerMatch(){
 		System.out.println("- "+equipeA.getClub().toString()+" vs "+equipeB.getClub().toString()+" -");
 		System.out.println("Début du match : "+heureDebut);
 		System.out.println("Arbitre : "+arbitre.getNomPrenom());
-		
-		System.out.println("Entrez une lettre pour donner le coup d'envoi...");
-		try{
-			Scanner sc = new Scanner(System.in);
-			sc.nextInt();
-			sc.close();
-		}catch(Exception e){}
-		
-		for(int i = 0 ; i < 91 ; i++){
-			event = RANDOM.nextInt(100);
-			if(event<5){
-				System.out.println(i+"' : but des "+equipeA.getClub().toString());
-				scoreA++;
-				System.out.println("\t\t"+scoreA+" - "+scoreB);
-			}
-			if(event>95){
-				System.out.println(i+"' : but des "+equipeB.getClub().toString());
-				scoreB++;
-				System.out.println("\t\t"+scoreA+" - "+scoreB);
-			}		
-		}
-		System.out.println("Score à la fin du temps réglementaire : ");
-		System.out.println(equipeA.getClub().toString()+" : "+scoreA);
-		System.out.println(equipeB.getClub().toString()+" : "+scoreB);
+		System.out.println("Entrez le score pour "+equipeA.getClub().toString()+" : ");
+		int entree = 0;
+		do{
+			entree = Menu.lireValeur();
+		}while(entree < 0);
+		scoreA = entree;
+		System.out.println("Entrez le score pour "+equipeB.getClub().toString()+" : ");
+		do{
+			entree = Menu.lireValeur();
+		}while(entree < 0);
+		scoreB = entree;
+		return resultatMatch();
+	}
+	
+	private boolean resultatMatch(){
 		if(scoreA>scoreB){
 			System.out.println(equipeA.getClub().toString()+" remporte le match !");
 			Equipe.ajouterVictoire(equipeA.id);
@@ -97,6 +88,37 @@ public class Match implements Serializable{
 				return false;
 			}
 		}
+	}
+	private boolean simulerMatch(){
+		int event = 0;
+		System.out.println("- "+equipeA.getClub().toString()+" vs "+equipeB.getClub().toString()+" -");
+		System.out.println("Début du match : "+heureDebut);
+		System.out.println("Arbitre : "+arbitre.getNomPrenom());
+		
+		System.out.println("Entrez une lettre pour donner le coup d'envoi...");
+		try{
+			Scanner sc = new Scanner(System.in);
+			sc.nextInt();
+			sc.close();
+		}catch(Exception e){}
+		
+		for(int i = 0 ; i < 91 ; i++){
+			event = RANDOM.nextInt(100);
+			if(event<5){
+				System.out.println(i+"' : but des "+equipeA.getClub().toString());
+				scoreA++;
+				System.out.println("\t\t"+scoreA+" - "+scoreB);
+			}
+			if(event>95){
+				System.out.println(i+"' : but des "+equipeB.getClub().toString());
+				scoreB++;
+				System.out.println("\t\t"+scoreA+" - "+scoreB);
+			}		
+		}
+		System.out.println("Score à la fin du temps réglementaire : ");
+		System.out.println(equipeA.getClub().toString()+" : "+scoreA);
+		System.out.println(equipeB.getClub().toString()+" : "+scoreB);
+		return(resultatMatch());
 	}
 	
 	public Equipe getEquipeA(){
@@ -133,7 +155,7 @@ public class Match implements Serializable{
 	
 	
 	private void sauver(){
-		String s = getListeMatchs() + "\n" + toString();
+		String s = getListeMatchs() + "\n\n" + toString();
 		File file = new File("listeMatchs.txt");
 		FileOutputStream fos = null;
 		ObjectOutputStream sortie = null;

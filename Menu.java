@@ -131,7 +131,7 @@ public class Menu {
 		}
 	}
 	
-	public static void gestionArbitres(){
+	private static void gestionArbitres(){
 		int choix = 0, nbArbitres = 0;
 		ArrayList<Arbitre> lesArbitres = Arbitre.charger();
 		if(lesArbitres!=null) nbArbitres = lesArbitres.size();
@@ -185,7 +185,7 @@ public class Menu {
 		}while(true);
 	}
 	
-	public static void gestionEquipes(){
+	private static void gestionEquipes(){
 		int choix = 0, nbEquipes = 0;
 		Hashtable<Integer,Equipe> lesEquipes = Equipe.charger();
 		if(lesEquipes!=null) nbEquipes = lesEquipes.size();
@@ -242,11 +242,11 @@ public class Menu {
 	}
 	
 	public static void attendre(){
-		System.out.println("Entrez une lettre pour continuer...");
+		System.out.println("Entrez une valeur pour continuer...");
 		try{
-			Scanner sc = new Scanner(System.in);
-			sc.nextInt();
-			sc.close();
+			Scanner scan = new Scanner(System.in);
+			scan.next();
+			
 		}catch(Exception e){}
 		finally{
 			System.out.println("\n");
